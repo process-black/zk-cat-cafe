@@ -1,8 +1,108 @@
+"use client";
 import Image from "next/image";
 
+import WelcomeScreen from "./WelcomeScreen";
+import DisclaimerScreen from "./DisclaimerScreen";
+import NewGameScreen, { GameState } from "./NewGameScreen";
+import { useState, useEffect } from "react";
+
 export default function Home() {
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [showNewGame, setShowNewGame] = useState(false);
+  const [canContinue, setCanContinue] = useState(false);
+  const [gameState, setGameState] = useState<GameState | undefined>(undefined);
+const [initialInventory, setInitialInventory] = useState<{ [ingredient: string]: number }>({});
+const [initialMoney, setInitialMoney] = useState<number>(50);
+
+  // Check for saved progress on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("cat-cafe-save");
+      setCanContinue(!!saved);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setGameState(parsed);
+          // Restore inventory and money if present
+          if (parsed.inventory) {
+            localStorage.setItem("cat-cafe-inventory", JSON.stringify(parsed.inventory));
+          }
+          if (parsed.money !== undefined) {
+            localStorage.setItem("cat-cafe-money", String(parsed.money));
+          }
+        } catch {
+          setGameState(undefined);
+        }
+      }
+    }
+  }, []);
+
+  // Save progress to localStorage whenever gameState changes
+  const handleSaveProgress = (state: GameState & { inventory?: any; money?: any }) => {
+    setGameState(state);
+    // Also save inventory and money if present
+    if (state.inventory) {
+      localStorage.setItem("cat-cafe-inventory", JSON.stringify(state.inventory));
+    }
+    if (state.money !== undefined) {
+      localStorage.setItem("cat-cafe-money", String(state.money));
+    }
+
+    localStorage.setItem("cat-cafe-save", JSON.stringify(state));
+    setCanContinue(true);
+  };
+
+  // Start a new game: reset progress
+  const handleNewGame = () => {
+    localStorage.removeItem("cat-cafe-save");
+    localStorage.removeItem("cat-cafe-inventory");
+    localStorage.removeItem("cat-cafe-money");
+    localStorage.removeItem("cat-cafe-food-stats");
+    setGameState({ progress: 0 }); // or your default state
+    setShowWelcome(false);
+    setShowDisclaimer(true);
+    setShowNewGame(false);
+    setCanContinue(false);
+  };
+
+  const handleAcceptDisclaimer = () => {
+    setShowDisclaimer(false);
+    setShowNewGame(true);
+  };
+
+  // Continue: load saved progress
+  const handleContinue = () => {
+    // Load inventory and money from localStorage and set as initial values for NewGameScreen
+    const storedInv = localStorage.getItem("cat-cafe-inventory");
+    const storedMoney = localStorage.getItem("cat-cafe-money");
+    setInitialInventory(storedInv ? JSON.parse(storedInv) : {});
+    setInitialMoney(storedMoney ? Number(storedMoney) : 50);
+    setShowWelcome(false);
+    setShowNewGame(true);
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
+    <>
+      {showWelcome && (
+        <WelcomeScreen
+          onNewGame={handleNewGame}
+          onContinue={handleContinue}
+          canContinue={canContinue}
+        />
+      )}
+      {showDisclaimer && (
+        <DisclaimerScreen onAccept={handleAcceptDisclaimer} />
+      )}
+      {showNewGame && (
+        <NewGameScreen
+          initialState={gameState}
+          initialInventory={initialInventory}
+          initialMoney={initialMoney}
+          onSaveProgress={handleSaveProgress}
+        />
+      )}
+      <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         <Image
           className="dark:invert"
@@ -14,14 +114,14 @@ export default function Home() {
         />
         <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
           <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
+            hi please edit{" "}
             <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
               src/app/page.tsx
             </code>
             .
           </li>
           <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
+            look i can edit this too
           </li>
         </ol>
 
@@ -98,6 +198,7 @@ export default function Home() {
           Go to nextjs.org →
         </a>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }

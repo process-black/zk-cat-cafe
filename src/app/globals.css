@@ -10,6 +10,15 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-delius-unicase: 'Delius Unicase', cursive;
+  --font-sour-gummy: 'Sour Gummy', cursive;
+}
+
+.font-delius-unicase {
+  font-family: var(--font-delius-unicase);
+}
+.font-sour-gummy {
+  font-family: var(--font-sour-gummy);
 }
 
 @media (prefers-color-scheme: dark) {

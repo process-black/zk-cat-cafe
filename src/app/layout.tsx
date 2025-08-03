@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Delius_Unicase, Sour_Gummy } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -10,6 +10,18 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const deliusUnicase = Delius_Unicase({
+  variable: "--font-delius-unicase",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
+const sourGummy = Sour_Gummy({
+  variable: "--font-sour-gummy",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -25,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${deliusUnicase.variable} ${sourGummy.variable} antialiased`}
       >
         {children}
       </body>
